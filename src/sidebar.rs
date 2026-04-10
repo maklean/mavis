@@ -1,5 +1,7 @@
 use ratatui::widgets::ListState;
 
+use crate::{algorithm::{Algorithm, maze::noise_map::NoiseMap}, grid};
+
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
     pub state: ListState, // the state (position) of the sidebar
@@ -33,12 +35,16 @@ impl Sidebar {
         }
     }
 
-    pub fn select(&mut self) {
-        self.state.select(Some(0));
+    pub fn select(&mut self, grid: &mut grid::Grid) {
+        let index = self.state.selected().unwrap_or(0);
+        let action = &self.page.options()[index].action;
 
-        if let Some(idx) = self.state.selected() {
-            match &self.page.options()[idx].action {
-                SidebarAction::SwitchPage(page) => self.page = page.clone()
+        match action {
+            SidebarAction::SwitchPage(page) => self.page = page.clone(),
+
+            SidebarAction::RunAlgorithm(algorithm) => {
+                let result = algorithm.as_ref().run(&grid.nodes);
+                grid.algorithm = Some(result);
             }
         }
     }
@@ -62,6 +68,7 @@ impl SidebarPage {
             ],
             SidebarPage::MazeAlgorithms => vec![
                 back_to_home,
+                SidebarOption::new("Noise Map", SidebarAction::RunAlgorithm(Box::new(NoiseMap)))
             ],
             SidebarPage::PathfindingAlgorithms => vec![
                 back_to_home
@@ -85,5 +92,6 @@ impl SidebarOption {
 }
 
 enum SidebarAction {
-    SwitchPage(SidebarPage)
+    SwitchPage(SidebarPage),
+    RunAlgorithm(Box<dyn Algorithm>)
 }

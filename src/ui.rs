@@ -3,7 +3,7 @@ use ratatui::{
     prelude::Stylize
 };
 
-use crate::{app, grid::{self, GridNode}, sidebar};
+use crate::{app, grid, sidebar};
 
 pub fn render(frame: &mut Frame, app: &mut app::App) {
     let app_layout = Layout::vertical([
@@ -14,12 +14,14 @@ pub fn render(frame: &mut Frame, app: &mut app::App) {
 
     let [header_area, _, main_area] = app_layout.areas(frame.area());
 
-    draw_header(frame, header_area);
+    draw_header(frame, header_area, &app.grid);
     draw_main_area(frame, main_area, app);
 }
 
-fn draw_header(frame: &mut Frame, header_area: Rect) {
-    let subtitle_text = format!("v0.1.0 | Generating: NONE | Iterations: 0");
+fn draw_header(frame: &mut Frame, header_area: Rect, grid: &grid::Grid) {
+    let algorithm_name = if let Some(algorithm) = &grid.algorithm { algorithm.name } else { "NONE" };
+    let iterations = if let Some(algorithm) = &grid.algorithm { algorithm.current_index } else { 0 };
+    let subtitle_text = format!("v0.1.0 | Generating: {algorithm_name} | Iterations: {iterations}");
 
     let header_lines = vec![
         Line::from(Span::styled("                  __ ", Style::default().fg(Color::White))),
@@ -93,10 +95,7 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
     
     // regenerate grid if there are inconsistencies between console grid and grid state
     if grid.width() != grid_width || grid.height() != grid_height {
-        grid.nodes = (0..grid_height).map(|_| {
-            (0..grid_width).map(|_| GridNode::Empty).collect()
-        }).collect();
-
+        grid.reset(Some((grid_width, grid_height)));
         grid.bounds.0 = (grid_area.left() + 1, grid_area.top() + 1);
         grid.bounds.1 = (grid_area.right() - 2, grid_area.bottom() - 2);
     }

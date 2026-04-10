@@ -1,6 +1,6 @@
 use ratatui::{style::{Color, Style}, text::Span};
 
-use crate::utils::Coordinate;
+use crate::{algorithm::AlgorithmResult, utils::Coordinate};
 
 pub enum GridNode {
     Empty,
@@ -20,15 +20,25 @@ impl GridNode {
 
 pub struct Grid {
     pub nodes: Vec<Vec<GridNode>>,
-    pub bounds: (Coordinate, Coordinate)
+    pub bounds: (Coordinate, Coordinate),
+    pub algorithm: Option<AlgorithmResult>,
 }
 
 impl Grid {
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),
-            bounds: ((0, 0), (0, 0))
+            bounds: ((0, 0), (0, 0)),
+            algorithm: None
         }
+    }
+
+    pub fn reset(&mut self, new_size: Option<(u16, u16)>) {
+        let (width, height) = new_size.unwrap_or((self.width(), self.height()));
+        
+        self.nodes = (0..height).map(|_| {
+            (0..width).map(|_| GridNode::Empty).collect()
+        }).collect();
     }
 
     pub fn is_position_out_of_bounds(&self, position: Coordinate) -> bool {

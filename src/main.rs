@@ -8,6 +8,7 @@ mod sidebar;
 mod ui;
 mod event;
 mod utils;
+mod algorithm;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -32,6 +33,6 @@ fn main() -> io::Result<()> {
             crossterm::execute!(io::stdout(), crossterm::event::DisableMouseCapture)?;
         }
     }
-    
+
     Ok(())
 }
