@@ -5,7 +5,10 @@ use crate::utils;
 
 pub enum Event {
     AppQuit,
-    MouseDown(utils::Coordinate)
+    MouseDown(utils::Coordinate),
+    ScrollDown,
+    ScrollUp,
+    Select,
 }
 
 pub fn app_event_loop(tx: mpsc::Sender<Event>) -> io::Result<()> {
@@ -33,6 +36,9 @@ fn handle_key_event(event: KeyEvent) -> Option<Event> {
 
     match event.code {
         KeyCode::Esc => Some(Event::AppQuit),
+        KeyCode::Up => Some(Event::ScrollUp),
+        KeyCode::Down => Some(Event::ScrollDown),
+        KeyCode::Enter => Some(Event::Select),
         _ => None
     }
 }

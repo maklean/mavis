@@ -1,10 +1,11 @@
 use ratatui::{
-    Frame, layout::{Constraint, Layout, Rect}, style::{Color, Style}, symbols::border, text::{Line, Span, Text}, widgets::{Block, Paragraph}
+    Frame, layout::{Constraint, Layout, Rect}, style::{Color, Style}, symbols::border, text::{Line, Span, Text}, widgets::{Block, List, Paragraph},
+    prelude::Stylize
 };
 
-use crate::grid::{self, GridNode};
+use crate::{app, grid::{self, GridNode}, sidebar};
 
-pub fn render(frame: &mut Frame, grid: &mut grid::Grid) {
+pub fn render(frame: &mut Frame, app: &mut app::App) {
     let app_layout = Layout::vertical([
         Constraint::Percentage(11), // header area (mavis title + subtitle information)
         Constraint::Percentage(2),  // spacing
@@ -14,7 +15,7 @@ pub fn render(frame: &mut Frame, grid: &mut grid::Grid) {
     let [header_area, _, main_area] = app_layout.areas(frame.area());
 
     draw_header(frame, header_area);
-    draw_main_area(frame, main_area, grid);
+    draw_main_area(frame, main_area, app);
 }
 
 fn draw_header(frame: &mut Frame, header_area: Rect) {
@@ -32,7 +33,7 @@ fn draw_header(frame: &mut Frame, header_area: Rect) {
     frame.render_widget(Paragraph::new(Text::from(header_lines)), header_area);
 }
 
-fn draw_main_area(frame: &mut Frame, main_area: Rect, grid: &mut grid::Grid) {
+fn draw_main_area(frame: &mut Frame, main_area: Rect, app: &mut app::App) {
     let main_area_layout = Layout::horizontal([
         Constraint::Percentage(70), // grid
         Constraint::Percentage(2), // spacing
@@ -40,34 +41,49 @@ fn draw_main_area(frame: &mut Frame, main_area: Rect, grid: &mut grid::Grid) {
     ]);
     let [grid_area, _, sidebar_area] = main_area_layout.areas(main_area);
 
-    draw_sidebar(frame, sidebar_area);
-    draw_grid(frame, grid_area, grid);
+    draw_sidebar(frame, sidebar_area, &mut app.sidebar);
+    draw_grid(frame, grid_area, &mut app.grid);
 }
 
-fn draw_sidebar(frame: &mut Frame, sidebar_area: Rect) {
+fn draw_sidebar(frame: &mut Frame, sidebar_area: Rect, sidebar: &mut sidebar::Sidebar) {
     let sidebar_area_container = Layout::vertical([
         Constraint::Percentage(10), // spacing
         Constraint::Percentage(70), // sidebar list
         Constraint::Percentage(20), // sidebar description
     ]);
-    let [_, sidebar, sidebar_description] = sidebar_area_container.areas(sidebar_area);
+    let [_, sidebar_container, sidebar_description] = sidebar_area_container.areas(sidebar_area);
 
     let sidebar_description_text = Paragraph::new(
         Text::from(
             vec![
+                Line::from(Span::styled("[↑/↓] Scroll Up/Down", Style::default().fg(Color::White))),
+                Line::from(Span::styled("[ENTER] Select Option", Style::default().fg(Color::White))),
                 Line::from(Span::styled("[ESC] Quit Application", Style::default().fg(Color::White)))
             ]
         )
     );
     frame.render_widget(sidebar_description_text, sidebar_description);
-    frame.render_widget(
-        Block::bordered().title("What would you like to do?"),
+
+    let options = List::new(
+        sidebar.page
+            .options()
+            .iter()
+            .map(|o| o.title)
+    )
+        .block(Block::bordered().title("What would you like to do?"))
+        .highlight_style(Style::new().reversed())
+        .highlight_symbol(" >> ")
+        .repeat_highlight_symbol(true);
+
+    frame.render_stateful_widget(
+        options,
         Rect {
-            x: sidebar.left(),
-            y: sidebar.top(),
-            width: sidebar.width,
-            height: sidebar.height,
-        }
+            x: sidebar_container.left(),
+            y: sidebar_container.top(),
+            width: sidebar_container.width,
+            height: sidebar_container.height,
+        },
+        &mut sidebar.state
     );
 }
 
