@@ -1,7 +1,5 @@
 use ratatui::widgets::ListState;
 
-use crate::grid;
-
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
     pub state: ListState, // the state (position) of the sidebar

@@ -18,12 +18,7 @@ impl GridNode {
     }
 }
 
-pub enum GridState {
-    Idle
-}
-
 pub struct Grid {
-    pub state: GridState,
     pub nodes: Vec<Vec<GridNode>>,
     pub bounds: (Coordinate, Coordinate)
 }
@@ -31,7 +26,6 @@ pub struct Grid {
 impl Grid {
     pub fn new() -> Self {
         Self {
-            state: GridState::Idle,
             nodes: Vec::new(),
             bounds: ((0, 0), (0, 0))
         }
