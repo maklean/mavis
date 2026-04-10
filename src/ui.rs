@@ -1,4 +1,3 @@
-use rand::Rng;
 use ratatui::{
     Frame, layout::{Constraint, Layout, Rect}, style::{Color, Style}, symbols::border, text::{Line, Span, Text}, widgets::{Block, Paragraph}
 };
@@ -81,7 +80,7 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
         grid.nodes = (0..grid_height).map(|_| {
             (0..grid_width).map(|_| GridNode::Empty).collect()
         }).collect();
-        
+
         grid.bounds.0 = (grid_area.left() + 1, grid_area.top() + 1);
         grid.bounds.1 = (grid_area.right() - 2, grid_area.bottom() - 2);
     }
