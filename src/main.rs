@@ -7,6 +7,7 @@ mod grid;
 mod sidebar;
 mod ui;
 mod event;
+mod utils;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
@@ -24,11 +25,13 @@ fn main() -> io::Result<()> {
     });
 
     let mut app = App::new();
-    app.run(&mut terminal, rx)?;
-
-    // close application
-    ratatui::restore();
-    crossterm::execute!(io::stdout(), crossterm::event::DisableMouseCapture)?;
-
+    match app.run(&mut terminal, rx) {
+        Ok(_) | Err(_) => {
+            // close application
+            ratatui::restore();
+            crossterm::execute!(io::stdout(), crossterm::event::DisableMouseCapture)?;
+        }
+    }
+    
     Ok(())
 }

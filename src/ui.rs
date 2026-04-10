@@ -2,7 +2,9 @@ use ratatui::{
     Frame, layout::{Constraint, Layout, Rect}, style::{Color, Style}, symbols::border, text::{Line, Span, Text}, widgets::{Block, Paragraph}
 };
 
-pub fn render(frame: &mut Frame) {
+use crate::grid::{self, GridNode};
+
+pub fn render(frame: &mut Frame, grid: &mut grid::Grid) {
     let app_layout = Layout::vertical([
         Constraint::Percentage(11), // header area (mavis title + subtitle information)
         Constraint::Percentage(2),  // spacing
@@ -12,7 +14,7 @@ pub fn render(frame: &mut Frame) {
     let [header_area, _, main_area] = app_layout.areas(frame.area());
 
     draw_header(frame, header_area);
-    draw_main_area(frame, main_area);
+    draw_main_area(frame, main_area, grid);
 }
 
 fn draw_header(frame: &mut Frame, header_area: Rect) {
@@ -30,16 +32,16 @@ fn draw_header(frame: &mut Frame, header_area: Rect) {
     frame.render_widget(Paragraph::new(Text::from(header_lines)), header_area);
 }
 
-fn draw_main_area(frame: &mut Frame, main_area: Rect) {
+fn draw_main_area(frame: &mut Frame, main_area: Rect, grid: &mut grid::Grid) {
     let main_area_layout = Layout::horizontal([
         Constraint::Percentage(70), // grid
         Constraint::Percentage(2), // spacing
         Constraint::Percentage(28), // sidebar
     ]);
-    let [grid, _, sidebar_area] = main_area_layout.areas(main_area);
+    let [grid_area, _, sidebar_area] = main_area_layout.areas(main_area);
 
     draw_sidebar(frame, sidebar_area);
-    draw_grid(frame, grid);
+    draw_grid(frame, grid_area, grid);
 }
 
 fn draw_sidebar(frame: &mut Frame, sidebar_area: Rect) {
@@ -69,9 +71,19 @@ fn draw_sidebar(frame: &mut Frame, sidebar_area: Rect) {
     );
 }
 
-fn draw_grid(frame: &mut Frame, grid_area: Rect) {
+fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
     // -2 for internal padding
     let (grid_width, grid_height) = (grid_area.width - 2, grid_area.height - 2);
+    
+    // regenerate grid if there are inconsistencies between console grid and grid state
+    if grid.width() != grid_width || grid.height() != grid_height {
+        grid.nodes = (0..grid_height).map(|_| {
+            (0..grid_width).map(|_| GridNode::Empty).collect()
+        }).collect();
+
+        grid.bounds.0 = (grid_area.left() + 1, grid_area.top() + 1);
+        grid.bounds.1 = (grid_area.right() - 2, grid_area.bottom() - 2);
+    }
 
     let border_title = format!("Main Grid ({grid_width} x {grid_height})");
     let border = Block::bordered().title(border_title).border_set(border::THICK);
