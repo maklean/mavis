@@ -1,3 +1,4 @@
+use rand::Rng;
 use ratatui::{
     Frame, layout::{Constraint, Layout, Rect}, style::{Color, Style}, symbols::border, text::{Line, Span, Text}, widgets::{Block, Paragraph}
 };
@@ -80,11 +81,12 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
         grid.nodes = (0..grid_height).map(|_| {
             (0..grid_width).map(|_| GridNode::Empty).collect()
         }).collect();
-
+        
         grid.bounds.0 = (grid_area.left() + 1, grid_area.top() + 1);
         grid.bounds.1 = (grid_area.right() - 2, grid_area.bottom() - 2);
     }
 
+    // Draw grid box
     let border_title = format!("Main Grid ({grid_width} x {grid_height})");
     let border = Block::bordered().title(border_title).border_set(border::THICK);
 
@@ -93,5 +95,18 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
         y: grid_area.top(),
         width: grid_area.width,
         height: grid_area.height,
+    });
+
+    // Draw nodes on screen
+    let grid_content: Vec<Line> = grid.nodes.iter().map(|row| {
+        let nodes: Vec<Span> = row.iter().map(|node| node.span()).collect();
+        Line::from(nodes)
+    }).collect();
+
+    frame.render_widget(Paragraph::new(Text::from(grid_content)), Rect {
+        x: grid_area.left() + 1,
+        y: grid_area.top() + 1,
+        width: grid_width,
+        height: grid_height,
     });
 }

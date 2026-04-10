@@ -1,9 +1,21 @@
+use ratatui::{style::{Color, Style}, text::Span};
+
 use crate::utils::Coordinate;
 
 pub enum GridNode {
     Empty,
     Wall,
     Path
+}
+
+impl GridNode {
+    pub fn span(&self) -> Span<'_> {
+        match self {
+            GridNode::Empty => Span::styled(" ", Style::default().fg(Color::White)),
+            GridNode::Wall => Span::styled("█", Style::default().fg(Color::White)),
+            GridNode::Path => Span::styled("@", Style::default().fg(Color::LightGreen)),
+        }
+    }
 }
 
 pub enum GridState {
