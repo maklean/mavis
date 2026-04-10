@@ -1,37 +1,34 @@
-use std::{io::{self, stdout}, sync::mpsc, thread};
+use std::{io::{self}, sync::mpsc, thread};
 
-use crossterm::{event::{DisableMouseCapture, EnableMouseCapture}, execute};
-
-use crate::{app::App, event::{loop_key_events, Event}};
+use crate::{app::App, event::app_event_loop};
 
 mod app;
+mod grid;
+mod sidebar;
 mod ui;
 mod event;
-mod sidebar;
-mod algorithm;
-mod grid;
-mod utils;
 
 fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
-    
+
     // enable mouse detection
-    execute!(stdout(), EnableMouseCapture)?;
-    
-    let mut app = App::new();
+    crossterm::execute!(io::stdout(), crossterm::event::EnableMouseCapture)?;
 
-    // Event-loop threads
-    let (event_tx, event_rx) = mpsc::channel::<Event>();
+    // startup event-loop threads
+    let (tx, rx) = mpsc::channel::<event::Event>();
 
-    let key_event_tx = event_tx.clone();
+    // spawn thread for key handling
+    let key_tx = tx.clone();
     thread::spawn(|| {
-        loop_key_events(key_event_tx).expect("Failed to loop events.");
+        app_event_loop(key_tx).unwrap();
     });
 
-    let app_result = app.run(&mut terminal, event_rx, event_tx);
-    
-    ratatui::restore();
-    execute!(stdout(), DisableMouseCapture)?;
+    let mut app = App::new();
+    app.run(&mut terminal, rx)?;
 
-    app_result
+    // close application
+    ratatui::restore();
+    crossterm::execute!(io::stdout(), crossterm::event::DisableMouseCapture)?;
+
+    Ok(())
 }

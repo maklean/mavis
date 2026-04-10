@@ -1,45 +1,31 @@
-use std::{ io, sync::mpsc::Sender };
+use std::{io, sync::mpsc};
 
-use crossterm::event::{ KeyCode, KeyEventKind, MouseButton, MouseEventKind };
-
-use crate::{algorithm::Coord, app::App};
+use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
 pub enum Event {
-    KeyPress(KeyCode),
-    MousePress(Coord),
-    Empty
+    AppQuit,
 }
 
-pub fn loop_key_events(tx: Sender<Event>) -> io::Result<()> {
+pub fn app_event_loop(tx: mpsc::Sender<Event>) -> io::Result<()> {
     loop {
         match crossterm::event::read()? {
-            crossterm::event::Event::Key(key_event) => {
-                if key_event.kind == KeyEventKind::Press {
-                    tx.send(Event::KeyPress(key_event.code)).expect(
-                        "Should be able to send key press event to receiver."
-                    );
+            crossterm::event::Event::Key(event) => {
+                if let Some(result) = handle_key_event(event) {
+                    tx.send(result).expect("Should be able to send result event");
                 }
             },
-            crossterm::event::Event::Mouse(mouse_event) => {
-                if let MouseEventKind::Down(button) = mouse_event.kind && button == MouseButton::Left {
-                    tx.send(Event::MousePress((mouse_event.column as i32, mouse_event.row as i32))).expect(
-                        "Should be able to send mouse press event to receiver."
-                    );
-                }
-            }
             _ => {}
         }
     }
 }
 
-pub fn handle_key_press(app: &mut App, key: KeyCode) {
-    if key == KeyCode::Char('q') {
-        app.exit = true;
-    } else if key == KeyCode::Up {
-        app.sidebar.prev();
-    } else if key == KeyCode::Down {
-        app.sidebar.next();
-    } else if key == KeyCode::Enter {
-        app.sidebar.select(&mut app.grid);
+fn handle_key_event(event: KeyEvent) -> Option<Event> {
+    if event.kind != KeyEventKind::Press {
+        return None;
+    }
+
+    match event.code {
+        KeyCode::Esc => Some(Event::AppQuit),
+        _ => None
     }
 }
