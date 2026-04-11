@@ -1,7 +1,10 @@
+use std::rc::Rc;
+
 use ratatui::{style::{Color, Style}, text::Span};
 
-use crate::{algorithm::AlgorithmResult, utils::Coordinate};
+use crate::{algorithm::{Algorithm, AlgorithmResult}, utils::Coordinate};
 
+#[derive(PartialEq)]
 pub enum GridNode {
     Empty,
     Wall,
@@ -18,10 +21,48 @@ impl GridNode {
     }
 }
 
+pub struct MarkersState {
+    pub is_placing: bool,
+    pub first: Option<Coordinate>,
+    pub second: Option<Coordinate>,
+    pub target_algorithm: Option<Rc<dyn Algorithm>>
+}
+
+impl MarkersState {
+    fn new(target_algorithm: Option<Rc<dyn Algorithm>>) -> Self {
+        Self {
+            is_placing: false,
+            first: None,
+            second: None,
+            target_algorithm: target_algorithm
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.is_placing = false;
+        self.first = None;
+        self.second = None;
+        self.target_algorithm = None;
+    }
+
+    pub fn next(&mut self) -> &mut Option<Coordinate> {
+        if !self.is_placing {
+            panic!("called MarkersState::next() when no placing is happening");
+        }
+
+        if self.first == None {
+            &mut self.first
+        } else {
+            &mut self.second
+        }
+    }
+}
+
 pub struct Grid {
     pub nodes: Vec<Vec<GridNode>>,
     pub bounds: (Coordinate, Coordinate),
     pub algorithm: Option<AlgorithmResult>,
+    pub markers_state: MarkersState,
 }
 
 impl Grid {
@@ -29,13 +70,14 @@ impl Grid {
         Self {
             nodes: Vec::new(),
             bounds: ((0, 0), (0, 0)),
-            algorithm: None
+            algorithm: None,
+            markers_state: MarkersState::new(None)
         }
     }
 
     pub fn reset(&mut self, new_size: Option<(u16, u16)>) {
         let (width, height) = new_size.unwrap_or((self.width(), self.height()));
-        
+
         self.nodes = (0..height).map(|_| {
             (0..width).map(|_| GridNode::Empty).collect()
         }).collect();

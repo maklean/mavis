@@ -24,9 +24,18 @@ impl App {
                 match event {
                     event::Event::AppQuit => break,
                     event::Event::MouseDown(position) => {
-                        if !self.grid.is_position_out_of_bounds(position) {
-                            // do stuff
-                            break;
+                        if self.grid.markers_state.is_placing && !self.grid.is_position_out_of_bounds(position) {
+                            *(self.grid.markers_state.next()) = Some((position.0 - self.grid.bounds.0.0, position.1 - self.grid.bounds.0.1));
+
+                            if self.grid.markers_state.second != None {
+                                let target_algorithm = self.grid.markers_state.target_algorithm.as_ref().unwrap();
+                                let endpoints = (self.grid.markers_state.first.unwrap(), self.grid.markers_state.second.unwrap());
+                                let result = target_algorithm.run(&self.grid.nodes, Some(endpoints));
+
+                                self.grid.algorithm = Some(result);
+                                
+                                self.grid.markers_state.reset();
+                            }
                         }
                     }
                     event::Event::ScrollUp => self.sidebar.prev(),
@@ -50,14 +59,30 @@ impl App {
 
         let mut current_index = algorithm.current_index;
 
+        if algorithm.final_path.len() == 0 {
+            self.grid.algorithm = None;
+            return;
+        }
+
         // if we're at the start, we should reset the entire map for Maze generation algorithms
         if algorithm.algorithm_type == AlgorithmType::Maze && current_index == 0 {
             self.grid.reset(None);
+        } else if algorithm.algorithm_type == AlgorithmType::Pathfinding && current_index == 0 {
+            self.grid.nodes = self.grid.nodes.iter().map(|row| {
+                let new_row: Vec<GridNode> = row.iter().map(|n| {
+                    match n {
+                        GridNode::Empty | GridNode::Path => GridNode::Empty,
+                        GridNode::Wall => GridNode::Wall
+                    }
+                }).collect();
+
+                new_row
+            }).collect();
         }
 
         // do 20 steps at a time
         for _ in 0..20 {
-            let (r, c) = algorithm.final_path[current_index];
+            let (c, r) = algorithm.final_path[current_index];
             self.grid.nodes[r as usize][c as usize] = if algorithm.algorithm_type == AlgorithmType::Maze { GridNode::Wall } else { GridNode::Path };
             current_index += 1;
 

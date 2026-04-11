@@ -15,7 +15,7 @@ impl Algorithm for NoiseMap {
         AlgorithmType::Maze
     }
 
-    fn run(&self, grid: &Vec<Vec<GridNode>>) -> AlgorithmResult {
+    fn run(&self, grid: &Vec<Vec<GridNode>>, _endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
         let mut rng = rand::rng();
         let mut final_path: Vec<Coordinate> = Vec::new();
 
@@ -23,7 +23,7 @@ impl Algorithm for NoiseMap {
 
         for r in 0..w {
             for c in 0..h {
-                let coord = (r as u16, c as u16);
+                let coord = (c as u16, r as u16);
 
                 if rng.random_range(1..=100) <= NOISE_MAP_WALL_CHANCE {
                     final_path.push(coord)

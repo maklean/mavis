@@ -101,7 +101,14 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
     }
 
     // Draw grid box
-    let border_title = format!("Main Grid ({grid_width} x {grid_height})");
+    let markers_state = &grid.markers_state;
+    let border_title: String = if markers_state.is_placing {
+        let next_point = if markers_state.first == None { "first" } else { "second" };
+        format!("Click anywhere on the grid to place the {next_point} endpoint.")
+    } else {
+        format!("Main Grid ({grid_width} x {grid_height})")
+    };
+
     let border = Block::bordered().title(border_title).border_set(border::THICK);
 
     frame.render_widget(border,  Rect {
@@ -116,7 +123,7 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
         let nodes: Vec<Span> = row.iter().map(|node| node.span()).collect();
         Line::from(nodes)
     }).collect();
-
+    
     frame.render_widget(Paragraph::new(Text::from(grid_content)), Rect {
         x: grid_area.left() + 1,
         y: grid_area.top() + 1,

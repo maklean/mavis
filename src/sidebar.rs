@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 use ratatui::widgets::ListState;
 
-use crate::{algorithm::{Algorithm, maze::noise_map::NoiseMap}, grid};
+use crate::{algorithm::{Algorithm, maze::noise_map::NoiseMap, pathfinding::breadth_first_search::BreadthFirstSearch}, grid};
 
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
@@ -43,8 +45,13 @@ impl Sidebar {
             SidebarAction::SwitchPage(page) => self.page = page.clone(),
 
             SidebarAction::RunAlgorithm(algorithm) => {
-                let result = algorithm.as_ref().run(&grid.nodes);
+                let result = algorithm.as_ref().run(&grid.nodes, None);
                 grid.algorithm = Some(result);
+            },
+
+            SidebarAction::RunMarkersState(algorithm) => {
+                grid.markers_state.is_placing = true;
+                grid.markers_state.target_algorithm = Some(algorithm.clone());
             }
         }
     }
@@ -71,7 +78,8 @@ impl SidebarPage {
                 SidebarOption::new("Noise Map", SidebarAction::RunAlgorithm(Box::new(NoiseMap)))
             ],
             SidebarPage::PathfindingAlgorithms => vec![
-                back_to_home
+                back_to_home,
+                SidebarOption::new("BFS", SidebarAction::RunMarkersState(Rc::new(BreadthFirstSearch)))
             ]
         }
     }
@@ -93,5 +101,6 @@ impl SidebarOption {
 
 enum SidebarAction {
     SwitchPage(SidebarPage),
-    RunAlgorithm(Box<dyn Algorithm>)
+    RunAlgorithm(Box<dyn Algorithm>),
+    RunMarkersState(Rc<dyn Algorithm>),
 }

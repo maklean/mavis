@@ -1,16 +1,18 @@
 use crate::{grid::GridNode, utils::Coordinate};
 
 pub mod maze;
+pub mod pathfinding;
 
 pub trait Algorithm {
     fn name(&self) -> &'static str;
     fn algorithm_type(&self) -> AlgorithmType;
-    fn run(&self, grid: &Vec<Vec<GridNode>>) -> AlgorithmResult;
+    fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult;
 }
 
 #[derive(PartialEq, Clone)]
 pub enum AlgorithmType {
     Maze,
+    Pathfinding
 }
 
 #[derive(Clone)]
