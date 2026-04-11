@@ -1,5 +1,5 @@
 use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
-use std::collections::{VecDeque, HashMap};
+use std::{collections::{HashMap, VecDeque}, f64::INFINITY};
 
 pub struct BreadthFirstSearch;
 
@@ -28,7 +28,7 @@ impl Algorithm for BreadthFirstSearch {
 
         // in case no final path could be made
         let mut nearest = start;
-        let mut nearest_dist = utils::euclidean_distance(start, end);
+        let mut nearest_dist: f64 = INFINITY;
 
         while let Some((x, y)) = queue.pop_front() {
             if (x, y) == end { break; }
