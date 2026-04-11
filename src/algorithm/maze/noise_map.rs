@@ -4,7 +4,7 @@ use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNo
 
 pub struct NoiseMap;
 
-const NOISE_MAP_WALL_CHANCE: i32 = 10; // in %
+const NOISE_MAP_WALL_CHANCE: i32 = 30; // in %
 
 impl Algorithm for NoiseMap {
     fn name(&self) -> &'static str {

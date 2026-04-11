@@ -1,4 +1,4 @@
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::Coordinate};
+use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
 use std::collections::{VecDeque, HashMap};
 
 pub struct BreadthFirstSearch;
@@ -26,11 +26,18 @@ impl Algorithm for BreadthFirstSearch {
         distances.insert(start, 0);
         queue.push_front(start);
 
-        let mut last_node = start;
+        // in case no final path could be made
+        let mut nearest = start;
+        let mut nearest_dist = utils::euclidean_distance(start, end);
+
         while let Some((x, y)) = queue.pop_front() {
             if (x, y) == end { break; }
 
-            last_node = (x, y);
+            let dist_from_end = utils::euclidean_distance((x, y), end);
+            if dist_from_end < nearest_dist {
+                nearest_dist = dist_from_end;
+                nearest = (x, y);
+            }
 
             let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
@@ -58,8 +65,13 @@ impl Algorithm for BreadthFirstSearch {
             }
         }
 
-        // if there is no path, start from the furthest node we've reached (last_node)
-        let mut current_node = if distances.contains_key(&end) { end } else { last_node };
+        let mut current_node = if distances.contains_key(&end) { 
+            end 
+        } else { 
+            // if there is no path, use nearest node to end node
+            nearest
+        };
+
         final_path.push(current_node);
 
         while parents.contains_key(&current_node) {
