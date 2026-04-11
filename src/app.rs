@@ -1,6 +1,6 @@
 use std::{io, sync::mpsc};
 
-use crate::{algorithm::AlgorithmType, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}};
+use crate::{algorithm::AlgorithmType, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
 
 pub struct App {
     pub grid: Grid, // the grid instance of the app
@@ -23,21 +23,7 @@ impl App {
             if let Ok(event) = rx.try_recv() {
                 match event {
                     event::Event::AppQuit => break,
-                    event::Event::MouseDown(position) => {
-                        if self.grid.markers_state.is_placing && !self.grid.is_position_out_of_bounds(position) {
-                            *(self.grid.markers_state.next()) = Some((position.0 - self.grid.bounds.0.0, position.1 - self.grid.bounds.0.1));
-
-                            if self.grid.markers_state.second != None {
-                                let target_algorithm = self.grid.markers_state.target_algorithm.as_ref().unwrap();
-                                let endpoints = (self.grid.markers_state.first.unwrap(), self.grid.markers_state.second.unwrap());
-                                let result = target_algorithm.run(&self.grid.nodes, Some(endpoints));
-
-                                self.grid.algorithm = Some(result);
-                                
-                                self.grid.markers_state.reset();
-                            }
-                        }
-                    }
+                    event::Event::MouseDown(position) => self.handle_marker_placement(position),
                     event::Event::ScrollUp => self.sidebar.prev(),
                     event::Event::ScrollDown => self.sidebar.next(),
                     event::Event::Select => self.sidebar.select(&mut self.grid),
@@ -94,5 +80,21 @@ impl App {
 
         // :(
         self.grid.algorithm.as_mut().unwrap().current_index = current_index;
+    }
+
+    fn handle_marker_placement(&mut self, position: Coordinate) {
+        if self.grid.markers_state.is_placing && !self.grid.is_position_out_of_bounds(position) {
+            *(self.grid.markers_state.next()) = Some((position.0 - self.grid.bounds.0.0, position.1 - self.grid.bounds.0.1));
+
+            if self.grid.markers_state.second != None {
+                let target_algorithm = self.grid.markers_state.target_algorithm.as_ref().unwrap();
+                let endpoints = (self.grid.markers_state.first.unwrap(), self.grid.markers_state.second.unwrap());
+                let result = target_algorithm.run(&self.grid.nodes, Some(endpoints));
+
+                self.grid.algorithm = Some(result);
+                
+                self.grid.markers_state.reset();
+            }
+        }
     }
 }

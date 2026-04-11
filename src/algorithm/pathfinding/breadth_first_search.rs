@@ -26,8 +26,11 @@ impl Algorithm for BreadthFirstSearch {
         distances.insert(start, 0);
         queue.push_front(start);
 
+        let mut last_node = start;
         while let Some((x, y)) = queue.pop_front() {
             if (x, y) == end { break; }
+
+            last_node = (x, y);
 
             let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)];
 
@@ -35,7 +38,7 @@ impl Algorithm for BreadthFirstSearch {
                 let n_x = x as i32 + dx;
                 let n_y = y as i32 + dy;
 
-                // Correct bounds check
+                // only visit neighbour if it's in bounds
                 if n_x >= 0 && n_x < w as i32 && n_y >= 0 && n_y < h as i32 {
                     let n_coord = (n_x as u16, n_y as u16);
 
@@ -55,12 +58,9 @@ impl Algorithm for BreadthFirstSearch {
             }
         }
 
-        if !distances.contains_key(&end) {
-            return AlgorithmResult::new(self.name(), self.algorithm_type(), final_path);
-        }
-
-        final_path.push(end);
-        let mut current_node = end;
+        // if there is no path, start from the furthest node we've reached (last_node)
+        let mut current_node = if distances.contains_key(&end) { end } else { last_node };
+        final_path.push(current_node);
 
         while parents.contains_key(&current_node) {
             let next_node = *parents.get(&current_node).expect("Should be able to get existing value");

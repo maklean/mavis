@@ -123,11 +123,21 @@ fn draw_grid(frame: &mut Frame, grid_area: Rect, grid: &mut grid::Grid) {
         let nodes: Vec<Span> = row.iter().map(|node| node.span()).collect();
         Line::from(nodes)
     }).collect();
-    
+
     frame.render_widget(Paragraph::new(Text::from(grid_content)), Rect {
         x: grid_area.left() + 1,
         y: grid_area.top() + 1,
         width: grid_width,
         height: grid_height,
     });
+
+    // Draw endpoint characters on screen
+    if grid.markers_state.is_placing && let Some((x, y)) = grid.markers_state.first {
+        frame.render_widget(Text::from("X"), Rect {
+            x: grid_area.left() + x + 1,
+            y: grid_area.top() + y + 1,
+            width: 1,
+            height: 1
+        });
+    }
 }
