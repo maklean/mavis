@@ -74,12 +74,12 @@ impl SidebarPage {
                 SidebarOption::new("View Pathfinding Algorithms", SidebarAction::SwitchPage(SidebarPage::PathfindingAlgorithms)),
             ],
             SidebarPage::MazeAlgorithms => vec![
+                SidebarOption::new("Noise Map", SidebarAction::RunAlgorithm(Box::new(NoiseMap))),
                 back_to_home,
-                SidebarOption::new("Noise Map", SidebarAction::RunAlgorithm(Box::new(NoiseMap)))
             ],
             SidebarPage::PathfindingAlgorithms => vec![
+                SidebarOption::new("BFS", SidebarAction::RunMarkersState(Rc::new(BreadthFirstSearch))),
                 back_to_home,
-                SidebarOption::new("BFS", SidebarAction::RunMarkersState(Rc::new(BreadthFirstSearch)))
             ]
         }
     }
