@@ -56,7 +56,7 @@ impl Algorithm for BreadthFirstSearch {
                     if !distances.contains_key(&n_coord) {
                         parents.insert(n_coord, (x, y));
                         // Distance should increment
-                        let d = *distances.get(&(x, y)).unwrap();
+                        let d = *distances.get(&(x, y)).expect("Should be able to get distance of popped node from queue.");
                         distances.insert(n_coord, d + 1);
                         
                         queue.push_back(n_coord);
