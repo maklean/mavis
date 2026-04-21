@@ -42,7 +42,10 @@ impl Sidebar {
         let action = &self.page.options()[index].action;
 
         match action {
-            SidebarAction::SwitchPage(page) => self.page = page.clone(),
+            SidebarAction::SwitchPage(page) => {
+                self.state.select(Some(0));
+                self.page = page.clone();
+            },
 
             SidebarAction::RunAlgorithm(algorithm) => {
                 let result = algorithm.as_ref().run(&grid.nodes, None);
