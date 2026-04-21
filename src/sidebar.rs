@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use ratatui::widgets::ListState;
 
-use crate::{algorithm::{Algorithm, maze::noise_map::NoiseMap, pathfinding::breadth_first_search::BreadthFirstSearch}, grid};
+use crate::{algorithm::{Algorithm, maze::noise_map::NoiseMap, pathfinding::{a_star::AStar, breadth_first_search::BreadthFirstSearch}}, grid};
 
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
@@ -79,6 +79,7 @@ impl SidebarPage {
             ],
             SidebarPage::PathfindingAlgorithms => vec![
                 SidebarOption::new("BFS", SidebarAction::RunMarkersState(Rc::new(BreadthFirstSearch))),
+                SidebarOption::new("A*", SidebarAction::RunMarkersState(Rc::new(AStar))),
                 back_to_home,
             ]
         }

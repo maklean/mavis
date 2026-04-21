@@ -13,7 +13,7 @@ impl Algorithm for BreadthFirstSearch {
     }
 
     fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
-        let (start, end) = endpoints.expect("There should be endpoints passed to BFS");
+        let (start, end) = endpoints.expect("There should be endpoints passed to Breadth-First Search.");
 
         let mut final_path: Vec<Coordinate> = Vec::new();
         let (w, h): (u16, u16) = (grid[0].len() as u16, grid.len() as u16);
