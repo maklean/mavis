@@ -1,55 +1,36 @@
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType, Coord}, grid::{Node, NodeType}};
-use rand::prelude::*;
+use rand::Rng;
 
-pub struct NoiseMap {
-    next: Coord,
-    fill_percentage: i32,
-    rng: ThreadRng,
-}
+use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::Coordinate};
 
-impl NoiseMap {
-    pub fn new(f: i32) -> Self {
-        Self {
-            next: (0, 0),
-            fill_percentage: f,
-            rng: rand::rng()
-        }
-    }
-}
+pub struct NoiseMap;
+
+const NOISE_MAP_WALL_CHANCE: i32 = 30; // in %
 
 impl Algorithm for NoiseMap {
-    fn step(&mut self, grid: &mut Vec<Vec<Node>>) -> AlgorithmResult {
-        let height = grid.len() as i32;
-        let width = grid[0].len() as i32;
-
-        let node = &mut grid[self.next.1 as usize][self.next.0 as usize];
-
-        if self.rng.random_range(0..=100) <= self.fill_percentage {
-            node.node_type = NodeType::Wall;
-        } else {
-            node.node_type = NodeType::Empty;
-        }
-
-        if self.next.0 == width-1 && self.next.1 == height-1 {
-            AlgorithmResult::Done(None)
-        } else {
-            let x: i32;
-            let y: i32;
-
-            if self.next.0 == width-1 {
-                x = 0;
-                y = self.next.1 + 1;
-            } else {
-                x = self.next.0 + 1;
-                y = self.next.1;
-            }
-
-            self.next = (x, y);
-            AlgorithmResult::ModifiedGrid
-        }
+    fn name(&self) -> &'static str {
+        "Noise Map"
     }
 
     fn algorithm_type(&self) -> AlgorithmType {
-        AlgorithmType::MazeGeneration
+        AlgorithmType::Maze
+    }
+
+    fn run(&self, grid: &Vec<Vec<GridNode>>, _endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
+        let mut rng = rand::rng();
+        let mut final_path: Vec<Coordinate> = Vec::new();
+
+        let (w, h) = (grid.len(), grid[0].len());
+
+        for r in 0..w {
+            for c in 0..h {
+                let coord = (c as u16, r as u16);
+
+                if rng.random_range(1..=100) <= NOISE_MAP_WALL_CHANCE {
+                    final_path.push(coord)
+                }
+            }
+        }
+
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path)
     }
 }

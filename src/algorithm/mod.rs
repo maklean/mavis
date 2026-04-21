@@ -1,25 +1,35 @@
-use crate::grid::Node;
+use crate::{grid::GridNode, utils::Coordinate};
 
 pub mod maze;
 pub mod pathfinding;
 
-pub type Coord = (i32, i32); // (x, y)
-
-#[derive(PartialEq)]
-pub enum AlgorithmResult {
-    ModifiedGrid,
-    Done(Option<Vec<Coord>>), // possible path can be returned
-    Impossible
-}
-
-#[derive(PartialEq)]
-pub enum AlgorithmType {
-    MazeGeneration,
-    Pathfinding,
-}
-
 pub trait Algorithm {
-    fn init(&mut self, start: Coord, end: Coord) { }
-    fn step(&mut self, grid: &mut Vec<Vec<Node>>) -> AlgorithmResult;
+    fn name(&self) -> &'static str;
     fn algorithm_type(&self) -> AlgorithmType;
+    fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult;
+}
+
+#[derive(PartialEq, Clone)]
+pub enum AlgorithmType {
+    Maze,
+    Pathfinding
+}
+
+#[derive(Clone)]
+pub struct AlgorithmResult {
+    pub name: &'static str,
+    pub algorithm_type: AlgorithmType,
+    pub final_path: Vec<Coordinate>, // the final path of coordinates
+    pub current_index: usize, // current index into final_path
+}
+
+impl AlgorithmResult {
+    pub fn new(name: &'static str, algorithm_type: AlgorithmType, path: Vec<Coordinate>) -> Self {
+        Self {
+            name,
+            algorithm_type,
+            final_path: path,
+            current_index: 0
+        }
+    }
 }
