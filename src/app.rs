@@ -85,7 +85,13 @@ impl App {
 
     fn handle_marker_placement(&mut self, position: Coordinate) {
         if self.grid.markers_state.is_placing && !self.grid.is_position_out_of_bounds(position) {
-            *(self.grid.markers_state.next()) = Some((position.0 - self.grid.bounds.0.0, position.1 - self.grid.bounds.0.1));
+            let (grid_c, grid_r) = (position.0 - self.grid.bounds.0.0, position.1 - self.grid.bounds.0.1);
+
+            if self.grid.nodes[grid_r as usize][grid_c as usize] == GridNode::Wall {
+                return;
+            }
+
+            *(self.grid.markers_state.next()) = Some((grid_c, grid_r));
 
             if self.grid.markers_state.second != None {
                 let target_algorithm = self.grid.markers_state.target_algorithm.as_ref().unwrap();
