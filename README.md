@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/104fd1fe-00a6-4b9c-afe6-33d06c33d003
 ## TODO
 - Implement maze generation algorithms:
     - [X] Recursive Backtracking
-    - [ ] Prim's
+    - [X] Prim's
     - [X] Noise Map
 - Implement pathfinding algorithms:
     - [X] A*
