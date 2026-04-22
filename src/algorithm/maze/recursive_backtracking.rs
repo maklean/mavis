@@ -68,9 +68,7 @@ impl Algorithm for RecursiveBacktracking {
         RecursiveBacktracking::recurse((1, 1), &mut visited, w as i32, h as i32); // start exploring at odd node
 
         // remove visited cells from final path
-        for coord in visited {
-            final_path.remove(&coord);
-        }
+        final_path.retain(|c| !visited.contains(c));
         
         AlgorithmResult::new(self.name(), self.algorithm_type(), final_path.into_iter().collect())
     }
