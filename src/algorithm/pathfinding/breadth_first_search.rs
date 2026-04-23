@@ -5,7 +5,7 @@ pub struct BreadthFirstSearch;
 
 impl Algorithm for BreadthFirstSearch {
     fn name(&self) -> &'static str {
-        "Breadth First Search"
+        "Breadth-First Search"
     }
 
     fn algorithm_type(&self) -> AlgorithmType {
