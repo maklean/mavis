@@ -6,7 +6,7 @@ pub mod pathfinding;
 pub trait Algorithm {
     fn name(&self) -> &'static str;
     fn algorithm_type(&self) -> AlgorithmType;
-    fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult;
+    fn run(&self, data: AlgorithmData) -> AlgorithmResult;
 }
 
 #[derive(PartialEq, Clone)]
@@ -30,6 +30,20 @@ impl AlgorithmResult {
             algorithm_type,
             final_path: path,
             current_index: 0
+        }
+    }
+}
+
+pub struct AlgorithmData<'a> {
+    grid: &'a Vec<Vec<GridNode>>,
+    endpoints: Option<(Coordinate, Coordinate)>
+}
+
+impl<'a> AlgorithmData<'a> {
+    pub fn new(grid: &'a Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> Self {
+        Self {
+            grid: grid,
+            endpoints,
         }
     }
 }

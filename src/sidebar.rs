@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use ratatui::widgets::ListState;
 
-use crate::{algorithm::{Algorithm, maze::{noise_map::NoiseMap, prims_algorithm::PrimsAlgorithm, recursive_backtracking::RecursiveBacktracking}, pathfinding::{a_star::AStar, breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch}}, grid};
+use crate::{algorithm::{Algorithm, AlgorithmData, maze::{noise_map::NoiseMap, prims_algorithm::PrimsAlgorithm, recursive_backtracking::RecursiveBacktracking}, pathfinding::{a_star::AStar, breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch}}, grid};
 
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
@@ -48,7 +48,7 @@ impl Sidebar {
             },
 
             SidebarAction::RunAlgorithm(algorithm) => {
-                let result = algorithm.as_ref().run(&grid.nodes, None);
+                let result = algorithm.as_ref().run(AlgorithmData::new(&grid.nodes, None));
                 grid.algorithm = Some(result);
             },
 

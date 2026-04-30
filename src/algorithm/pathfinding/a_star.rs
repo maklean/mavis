@@ -1,4 +1,4 @@
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate, manhattan_distance}};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate, manhattan_distance}};
 use std::{cmp::Ordering, collections::{HashMap, HashSet, BinaryHeap}, u16};
 
 pub struct AStar;
@@ -45,7 +45,9 @@ impl Algorithm for AStar {
         AlgorithmType::Pathfinding
     }
 
-    fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
+    fn run(&self, data: AlgorithmData) -> AlgorithmResult {
+        let (grid, endpoints) = (data.grid, data.endpoints);
+        
         let (start, end) = endpoints.expect("There should be endpoints passed to A*.");
         let (w, h): (u16, u16) = (grid[0].len() as u16, grid.len() as u16);
 

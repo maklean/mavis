@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::Coordinate};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, utils::Coordinate};
 
 pub struct NoiseMap;
 
@@ -15,7 +15,9 @@ impl Algorithm for NoiseMap {
         AlgorithmType::Maze
     }
 
-    fn run(&self, grid: &Vec<Vec<GridNode>>, _endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
+    fn run(&self, data: AlgorithmData) -> AlgorithmResult {
+        let grid = data.grid;
+
         let mut rng = rand::rng();
         let mut final_path: Vec<Coordinate> = Vec::new();
 

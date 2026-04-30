@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use rand::Rng;
 
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::Coordinate};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, utils::Coordinate};
 
 pub struct PrimsAlgorithm;
 
@@ -62,7 +62,8 @@ impl Algorithm for PrimsAlgorithm {
         AlgorithmType::Maze
     }
 
-    fn run(&self, grid: &Vec<Vec<GridNode>>, _endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
+    fn run(&self, data: AlgorithmData) -> AlgorithmResult {
+        let grid = data.grid;
         let mut final_path: HashSet<Coordinate> = HashSet::new(); // hashset for O(1) removal
         let (w, h) = (grid[0].len() as i32, grid.len() as i32);
 

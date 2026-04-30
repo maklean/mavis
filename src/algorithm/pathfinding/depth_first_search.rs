@@ -1,4 +1,4 @@
-use crate::{algorithm::{Algorithm, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
 use std::collections::{HashMap, HashSet};
 
 pub struct DepthFirstSearch;
@@ -56,7 +56,8 @@ impl Algorithm for DepthFirstSearch {
         AlgorithmType::Pathfinding
     }
 
-    fn run(&self, grid: &Vec<Vec<GridNode>>, endpoints: Option<(Coordinate, Coordinate)>) -> AlgorithmResult {
+    fn run(&self, data: AlgorithmData) -> AlgorithmResult {
+        let (grid, endpoints) = (data.grid, data.endpoints);
         let (start, end) = endpoints.expect("There should be endpoints passed to Depth-First Search.");
 
         let mut final_path: Vec<Coordinate> = Vec::new();

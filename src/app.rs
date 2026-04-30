@@ -1,6 +1,6 @@
 use std::{io, sync::mpsc};
 
-use crate::{algorithm::AlgorithmType, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
+use crate::{algorithm::{AlgorithmData, AlgorithmType}, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
 
 pub struct App {
     pub grid: Grid, // the grid instance of the app
@@ -96,7 +96,8 @@ impl App {
             if self.grid.markers_state.second != None {
                 let target_algorithm = self.grid.markers_state.target_algorithm.as_ref().unwrap();
                 let endpoints = (self.grid.markers_state.first.unwrap(), self.grid.markers_state.second.unwrap());
-                let result = target_algorithm.run(&self.grid.nodes, Some(endpoints));
+
+                let result = target_algorithm.run(AlgorithmData::new(&self.grid.nodes, Some(endpoints)));
 
                 self.grid.algorithm = Some(result);
                 
