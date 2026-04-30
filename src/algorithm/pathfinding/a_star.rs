@@ -1,4 +1,4 @@
-use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate, manhattan_distance}};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType, FrameNode, FrameNodeKind}, grid::GridNode, utils::{self, Coordinate, manhattan_distance}};
 use std::{cmp::Ordering, collections::{HashMap, HashSet, BinaryHeap}, u16};
 
 pub struct AStar;
@@ -52,11 +52,13 @@ impl Algorithm for AStar {
         let (w, h): (u16, u16) = (grid[0].len() as u16, grid.len() as u16);
 
         let mut final_path: Vec<Coordinate> = Vec::new();
+        let mut frames: Vec<FrameNode> = Vec::new();
 
         let mut open: BinaryHeap<AStarNode> = BinaryHeap::new();
         let mut closed: HashSet<Coordinate> = HashSet::new();
         let mut parent: HashMap<Coordinate, Coordinate> = HashMap::new();
 
+        frames.push(FrameNode::new(FrameNodeKind::PENDING, start));
         open.push(AStarNode::new(start, 0, manhattan_distance(start, end)));
 
         // in case no final path could be made
@@ -78,6 +80,7 @@ impl Algorithm for AStar {
                 continue;
             }
 
+            frames.push(FrameNode::new(FrameNodeKind::EXPLORED, current.coord));
             closed.insert(current.coord);
 
             // reached end node
@@ -118,6 +121,8 @@ impl Algorithm for AStar {
                 if tentative_g < neighbor_g_cost {
                     let new_neighbor_node = AStarNode::new(n_coord, tentative_g, manhattan_distance(n_coord, end));
                     parent.insert(n_coord, current.coord);
+
+                    frames.push(FrameNode::new(FrameNodeKind::PENDING, n_coord));
                     open.push(new_neighbor_node);
                 }
             }
@@ -138,6 +143,6 @@ impl Algorithm for AStar {
 
         final_path.reverse();
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, frames)
     }
 }

@@ -8,7 +8,11 @@ use crate::{algorithm::{Algorithm, AlgorithmResult}, utils::Coordinate};
 pub enum GridNode {
     Empty,
     Wall,
-    Path
+    Path,
+    ExploredPath,
+    PendingPath,
+    ExploredWall,
+    PendingWall,
 }
 
 impl GridNode {
@@ -17,6 +21,10 @@ impl GridNode {
             GridNode::Empty => Span::styled(" ", Style::default().fg(Color::White)),
             GridNode::Wall => Span::styled("█", Style::default().fg(Color::White)),
             GridNode::Path => Span::styled("@", Style::default().fg(Color::LightGreen)),
+            GridNode::ExploredPath => Span::styled("@", Style::default().fg(Color::Gray)),
+            GridNode::PendingPath => Span::styled("@", Style::default().fg(Color::LightBlue)),
+            GridNode::ExploredWall => Span::styled("█", Style::default().fg(Color::LightYellow)),
+            GridNode::PendingWall => Span::styled("█", Style::default().fg(Color::LightBlue)),
         }
     }
 }

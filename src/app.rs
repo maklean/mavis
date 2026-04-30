@@ -1,6 +1,6 @@
 use std::{io, sync::mpsc};
 
-use crate::{algorithm::{AlgorithmData, AlgorithmType}, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
+use crate::{algorithm::{AlgorithmData, AlgorithmResultStatus, AlgorithmType, FrameNodeKind}, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
 
 pub struct App {
     pub grid: Grid, // the grid instance of the app
@@ -31,7 +31,13 @@ impl App {
             }
 
             // handle current algorithm if there is one
-            self.handle_algorithm();
+            if let Some(algorithm) = self.grid.algorithm.as_ref() {
+                if algorithm.status == AlgorithmResultStatus::Frames {
+                    self.handle_frames();
+                } else {
+                    self.handle_algorithm();
+                }
+            }
         }
 
         Ok(())
@@ -80,6 +86,56 @@ impl App {
         }
 
         // :(
+        self.grid.algorithm.as_mut().unwrap().current_index = current_index;
+    }
+
+    fn handle_frames(&mut self) {
+        let Some(algorithm) = self.grid.algorithm.clone() else { return };
+
+        if algorithm.frames.len() == 0 {
+            self.grid.algorithm.as_mut().unwrap().current_index = 0;
+            self.grid.algorithm.as_mut().unwrap().status = AlgorithmResultStatus::FinalPath;
+            return;
+        }
+
+        let mut current_index = algorithm.current_index;
+
+        if current_index == 0 {
+            if algorithm.algorithm_type == AlgorithmType::Maze {
+                // if we're at the start, we should reset the entire map for Maze generation algorithms
+                self.grid.reset(None);
+            } else {
+                self.grid.nodes = self.grid.nodes.iter().map(|row| {
+                let new_row: Vec<GridNode> = row
+                    .iter()
+                    .map(|n| if *n == GridNode::Wall { GridNode::Wall } else { GridNode::Empty })
+                    .collect();
+
+                    new_row
+                }).collect();
+            }
+        }
+
+        let steps = if algorithm.algorithm_type == AlgorithmType::Maze { 60 } else { 9 };
+
+        for _ in 0..steps {
+            let (c, r) = algorithm.frames[current_index].coord;
+            let kind = &algorithm.frames[current_index].kind;
+
+            self.grid.nodes[r as usize][c as usize] = match kind {
+                FrameNodeKind::EXPLORED => if algorithm.algorithm_type == AlgorithmType::Maze { GridNode::ExploredWall } else { GridNode::ExploredPath },
+                FrameNodeKind::PENDING => if algorithm.algorithm_type == AlgorithmType::Maze { GridNode::PendingWall } else { GridNode::PendingPath },
+            };
+
+            current_index += 1;
+
+            if current_index >= algorithm.frames.len() {
+                self.grid.algorithm.as_mut().unwrap().current_index = 0;
+                self.grid.algorithm.as_mut().unwrap().status = AlgorithmResultStatus::FinalPath;
+                return;
+            }
+        }
+
         self.grid.algorithm.as_mut().unwrap().current_index = current_index;
     }
 

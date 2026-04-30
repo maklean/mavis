@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use ratatui::widgets::ListState;
 
-use crate::{algorithm::{Algorithm, AlgorithmData, maze::{noise_map::NoiseMap, prims_algorithm::PrimsAlgorithm, recursive_backtracking::RecursiveBacktracking}, pathfinding::{a_star::AStar, breadth_first_search::BreadthFirstSearch, depth_first_search::DepthFirstSearch}}, grid};
+use crate::{algorithm::{Algorithm, AlgorithmData, maze::{prims_algorithm::PrimsAlgorithm}, pathfinding::{a_star::AStar}}, grid};
 
 pub struct Sidebar {
     pub page: SidebarPage, // the current page the sidebar is in
@@ -77,15 +77,11 @@ impl SidebarPage {
                 SidebarOption::new("View Pathfinding Algorithms", SidebarAction::SwitchPage(SidebarPage::PathfindingAlgorithms)),
             ],
             SidebarPage::MazeAlgorithms => vec![
-                SidebarOption::new("Noise Map", SidebarAction::RunAlgorithm(Box::new(NoiseMap))),
-                SidebarOption::new("Recursive Backtracking", SidebarAction::RunAlgorithm(Box::new(RecursiveBacktracking))),
                 SidebarOption::new("Prim's Algorithm", SidebarAction::RunAlgorithm(Box::new(PrimsAlgorithm))),
                 back_to_home,
             ],
             SidebarPage::PathfindingAlgorithms => vec![
-                SidebarOption::new("BFS", SidebarAction::RunMarkersState(Rc::new(BreadthFirstSearch))),
                 SidebarOption::new("A*", SidebarAction::RunMarkersState(Rc::new(AStar))),
-                SidebarOption::new("DFS", SidebarAction::RunMarkersState(Rc::new(DepthFirstSearch))),
                 back_to_home,
             ]
         }
