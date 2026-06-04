@@ -33,6 +33,6 @@ impl Algorithm for NoiseMap {
             }
         }
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, None)
     }
 }

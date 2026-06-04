@@ -24,7 +24,8 @@ impl PrimsAlgorithm {
             }
 
             // add neighboring cell as frontier cell
-            frontier_cells.insert((x as u16, y as u16));
+            let n_coord = (x as u16, y as u16);
+            frontier_cells.insert(n_coord);
         }
     }
 
@@ -64,13 +65,15 @@ impl Algorithm for PrimsAlgorithm {
 
     fn run(&self, data: AlgorithmData) -> AlgorithmResult {
         let grid = data.grid;
-        let mut final_path: HashSet<Coordinate> = HashSet::new(); // hashset for O(1) removal
+
+        let mut final_path: Vec<Coordinate> = Vec::new();
+
         let (w, h) = (grid[0].len() as i32, grid.len() as i32);
 
         // fill entire grid with wall nodes
         for r in 0..h as u16 {
             for c in 0..w as u16 {
-                final_path.insert((c, r));
+                final_path.push((c, r));
             }
         }
         
@@ -99,16 +102,14 @@ impl Algorithm for PrimsAlgorithm {
             let wy = c_coord.1 as i32 + (n_coord.1 as i32 - c_coord.1 as i32) / 2;
 
             let w_coord = (wx as u16, wy as u16);
-
+            
             // remove nodes
-            final_path.remove(&w_coord);
-            final_path.remove(&c_coord);
-            final_path.remove(&n_coord);
+            final_path.retain(|&coord| coord != w_coord && coord != c_coord && coord != n_coord);
 
             // mark frontier cell
             PrimsAlgorithm::mark(c_coord, &mut in_cells, &mut frontier_cells, w, h);
         }
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path.into_iter().collect())
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, None)
     }
 }

@@ -55,13 +55,13 @@ impl Algorithm for RecursiveBacktracking {
 
     fn run(&self, data: AlgorithmData) -> AlgorithmResult {
         let grid = data.grid;
-        let mut final_path: HashSet<Coordinate> = HashSet::new(); // hashset for O(1) removal (also, since they aren't ordered it gives a pretty cool generation effect)
+        let mut final_path: Vec<Coordinate> = Vec::new();
         let (w, h) = (grid[0].len(), grid.len());
 
         // fill entire grid with wall nodes
         for r in 0..h as u16 {
             for c in 0..w as u16 {
-                final_path.insert((c, r));
+                final_path.push((c, r));
             }
         }
 
@@ -71,6 +71,6 @@ impl Algorithm for RecursiveBacktracking {
         // remove visited cells from final path
         final_path.retain(|c| !visited.contains(c));
         
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path.into_iter().collect())
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path.into_iter().collect(), None)
     }
 }

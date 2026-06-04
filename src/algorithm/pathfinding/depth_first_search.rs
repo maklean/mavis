@@ -1,12 +1,14 @@
-use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType, FrameNode, FrameNodeKind}, grid::GridNode, utils::{self, Coordinate}};
 use std::collections::{HashMap, HashSet};
 
 pub struct DepthFirstSearch;
 
 impl DepthFirstSearch {
     // Recursively traverses the grid, returns the nearest node to the end node and its distance from the end node.
-    fn recurse(coord: Coordinate, visited: &mut HashSet<Coordinate>, parents: &mut HashMap<Coordinate, Coordinate>, grid: &Vec<Vec<GridNode>>, target: Coordinate) -> (Coordinate, f64) {
+    fn recurse(coord: Coordinate, visited: &mut HashSet<Coordinate>, parents: &mut HashMap<Coordinate, Coordinate>, grid: &Vec<Vec<GridNode>>, target: Coordinate, frames: &mut Vec<FrameNode>) -> (Coordinate, f64) {
         visited.insert(coord);
+
+        frames.push(FrameNode::new(FrameNodeKind::EXPLORED, coord));
 
         if coord == target {
             return (coord, 0.0);
@@ -33,10 +35,12 @@ impl DepthFirstSearch {
             if visited.contains(&neighbor) {
                 continue;
             }
+        
+            frames.push(FrameNode::new(FrameNodeKind::PENDING, neighbor));
 
             parents.insert(neighbor, coord);
 
-            let (candidate, dist) = DepthFirstSearch::recurse(neighbor, visited, parents, grid, target);
+            let (candidate, dist) = DepthFirstSearch::recurse(neighbor, visited, parents, grid, target, frames);
             if nearest_dist < dist {
                 nearest = candidate;
                 nearest_dist = dist;
@@ -61,12 +65,13 @@ impl Algorithm for DepthFirstSearch {
         let (start, end) = endpoints.expect("There should be endpoints passed to Depth-First Search.");
 
         let mut final_path: Vec<Coordinate> = Vec::new();
+        let mut frames: Vec<FrameNode> = Vec::new();
         let mut visited: HashSet<Coordinate> = HashSet::new();
         let mut parents: HashMap<Coordinate, Coordinate> = HashMap::new();
 
         visited.insert(start);
 
-        let (nearest, _) = DepthFirstSearch::recurse(start, &mut visited, &mut parents, grid, end);
+        let (nearest, _) = DepthFirstSearch::recurse(start, &mut visited, &mut parents, grid, end, &mut frames);
         let mut current_node = *visited.get(&end).unwrap_or(&nearest);
 
         final_path.push(current_node);
@@ -80,6 +85,6 @@ impl Algorithm for DepthFirstSearch {
 
         final_path.reverse();
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, Some(frames))
     }
 }

@@ -1,6 +1,6 @@
 use std::{io, sync::mpsc};
 
-use crate::{algorithm::{AlgorithmData, AlgorithmType}, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
+use crate::{algorithm::{AlgorithmData, AlgorithmResultStatus, AlgorithmType, FrameNodeKind}, event::{self}, grid::{Grid, GridNode}, sidebar::Sidebar, ui::{self}, utils::Coordinate};
 
 pub struct App {
     pub grid: Grid, // the grid instance of the app
@@ -31,7 +31,13 @@ impl App {
             }
 
             // handle current algorithm if there is one
-            self.handle_algorithm();
+            if let Some(algorithm) = self.grid.algorithm.as_ref() {
+                if algorithm.frames.is_some() && algorithm.status == AlgorithmResultStatus::Frames {
+                    self.handle_frames();
+                } else {
+                    self.handle_algorithm();
+                }
+            }
         }
 
         Ok(())
@@ -80,6 +86,52 @@ impl App {
         }
 
         // :(
+        self.grid.algorithm.as_mut().unwrap().current_index = current_index;
+    }
+
+    fn handle_frames(&mut self) {
+        let Some(algorithm) = self.grid.algorithm.clone() else { return };
+        let algorithm_frames = algorithm.frames.expect("Should have frames");
+
+        if algorithm_frames.len() == 0 {
+            self.grid.algorithm.as_mut().unwrap().current_index = 0;
+            self.grid.algorithm.as_mut().unwrap().status = AlgorithmResultStatus::FinalPath;
+            return;
+        }
+
+        let mut current_index = algorithm.current_index;
+
+        if current_index == 0 {
+            self.grid.nodes = self.grid.nodes.iter().map(|row| {
+            let new_row: Vec<GridNode> = row
+                .iter()
+                .map(|n| if *n == GridNode::Wall { GridNode::Wall } else { GridNode::Empty })
+                .collect();
+
+                new_row
+            }).collect();
+        }
+
+        let steps = if algorithm.algorithm_type == AlgorithmType::Maze { 50 } else { 9 };
+
+        for _ in 0..steps {
+            let (c, r) = algorithm_frames[current_index].coord;
+            let kind = &algorithm_frames[current_index].kind;
+
+            self.grid.nodes[r as usize][c as usize] = match kind {
+                FrameNodeKind::EXPLORED => GridNode::ExploredPath,
+                FrameNodeKind::PENDING => GridNode::PendingPath,
+            };
+
+            current_index += 1;
+
+            if current_index >= algorithm_frames.len() {
+                self.grid.algorithm.as_mut().unwrap().current_index = 0;
+                self.grid.algorithm.as_mut().unwrap().status = AlgorithmResultStatus::FinalPath;
+                return;
+            }
+        }
+
         self.grid.algorithm.as_mut().unwrap().current_index = current_index;
     }
 

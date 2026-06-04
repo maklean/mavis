@@ -1,4 +1,4 @@
-use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, grid::GridNode, utils::{self, Coordinate}};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType, FrameNode, FrameNodeKind}, grid::GridNode, utils::{self, Coordinate}};
 use std::{collections::{HashMap, VecDeque}, f64::INFINITY};
 
 pub struct BreadthFirstSearch;
@@ -23,9 +23,12 @@ impl Algorithm for BreadthFirstSearch {
         let mut distances: HashMap<Coordinate, i32> = HashMap::new();
         let mut parents: HashMap<Coordinate, Coordinate> = HashMap::new();
 
+        let mut frames: Vec<FrameNode> = Vec::new();
+
         // set distance of source node to 0
         distances.insert(start, 0);
         queue.push_front(start);
+        
 
         // in case no final path could be made
         let mut nearest = start;
@@ -33,6 +36,8 @@ impl Algorithm for BreadthFirstSearch {
 
         while let Some((x, y)) = queue.pop_front() {
             if (x, y) == end { break; }
+
+            frames.push(FrameNode::new(FrameNodeKind::EXPLORED, (x, y)));
 
             let dist_from_end = utils::euclidean_distance((x, y), end);
             if dist_from_end < nearest_dist {
@@ -59,6 +64,8 @@ impl Algorithm for BreadthFirstSearch {
                         // Distance should increment
                         let d = *distances.get(&(x, y)).expect("Should be able to get distance of popped node from queue.");
                         distances.insert(n_coord, d + 1);
+
+                        frames.push(FrameNode::new(FrameNodeKind::PENDING, n_coord));
                         
                         queue.push_back(n_coord);
                     }
@@ -84,6 +91,6 @@ impl Algorithm for BreadthFirstSearch {
 
         final_path.reverse();
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, Some(frames))
     }
 }
