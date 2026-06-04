@@ -143,6 +143,6 @@ impl Algorithm for AStar {
 
         final_path.reverse();
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, frames)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, Some(frames))
     }
 }

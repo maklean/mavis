@@ -21,9 +21,7 @@ fn main() -> io::Result<()> {
 
     // spawn thread for key handling
     let key_tx = tx.clone();
-    thread::spawn(|| {
-        app_event_loop(key_tx).unwrap();
-    });
+    thread::spawn(|| app_event_loop(key_tx).unwrap());
 
     let mut app = App::new();
     match app.run(&mut terminal, rx) {

@@ -2,13 +2,13 @@ use std::collections::HashSet;
 
 use rand::Rng;
 
-use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType, FrameNode, FrameNodeKind}, utils::Coordinate};
+use crate::{algorithm::{Algorithm, AlgorithmData, AlgorithmResult, AlgorithmType}, utils::Coordinate};
 
 pub struct PrimsAlgorithm;
 
 impl PrimsAlgorithm {
     // marks the given cell as an "in" and makes its neighbors frontier cells
-    fn mark(coord: Coordinate, in_cells: &mut HashSet<Coordinate>, frontier_cells: &mut HashSet<Coordinate>, w: i32, h: i32, frames: &mut Vec<FrameNode>) {
+    fn mark(coord: Coordinate, in_cells: &mut HashSet<Coordinate>, frontier_cells: &mut HashSet<Coordinate>, w: i32, h: i32) {
         // mark current cell as an in-cell :o
         in_cells.insert(coord);
 
@@ -25,9 +25,6 @@ impl PrimsAlgorithm {
 
             // add neighboring cell as frontier cell
             let n_coord = (x as u16, y as u16);
-            if !frontier_cells.contains(&n_coord) && !in_cells.contains(&n_coord) {
-                frames.push(FrameNode::new(FrameNodeKind::PENDING, n_coord));
-            }
             frontier_cells.insert(n_coord);
         }
     }
@@ -69,8 +66,7 @@ impl Algorithm for PrimsAlgorithm {
     fn run(&self, data: AlgorithmData) -> AlgorithmResult {
         let grid = data.grid;
 
-        let mut final_path: Vec<Coordinate> = Vec::new(); // hashset for O(1) removal
-        let mut frames: Vec<FrameNode> = Vec::new();
+        let mut final_path: Vec<Coordinate> = Vec::new();
 
         let (w, h) = (grid[0].len() as i32, grid.len() as i32);
 
@@ -86,7 +82,7 @@ impl Algorithm for PrimsAlgorithm {
         let mut rng = rand::rng();
 
         let (start_c, start_r) = (rng.random_range(0..w) as u16, rng.random_range(0..h) as u16);
-        PrimsAlgorithm::mark((start_c, start_r), &mut in_cells, &mut frontier_cells, w, h, &mut frames);
+        PrimsAlgorithm::mark((start_c, start_r), &mut in_cells, &mut frontier_cells, w, h);
 
         while !frontier_cells.is_empty() {
             let idx = rng.random_range(0..frontier_cells.len());
@@ -106,18 +102,14 @@ impl Algorithm for PrimsAlgorithm {
             let wy = c_coord.1 as i32 + (n_coord.1 as i32 - c_coord.1 as i32) / 2;
 
             let w_coord = (wx as u16, wy as u16);
-
-            frames.push(FrameNode::new(FrameNodeKind::EXPLORED, c_coord));
-            frames.push(FrameNode::new(FrameNodeKind::EXPLORED, w_coord));
-            frames.push(FrameNode::new(FrameNodeKind::EXPLORED, n_coord));
             
             // remove nodes
             final_path.retain(|&coord| coord != w_coord && coord != c_coord && coord != n_coord);
 
             // mark frontier cell
-            PrimsAlgorithm::mark(c_coord, &mut in_cells, &mut frontier_cells, w, h, &mut frames);
+            PrimsAlgorithm::mark(c_coord, &mut in_cells, &mut frontier_cells, w, h);
         }
 
-        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path.into_iter().collect(), frames)
+        AlgorithmResult::new(self.name(), self.algorithm_type(), final_path, None)
     }
 }

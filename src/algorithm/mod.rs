@@ -48,13 +48,13 @@ pub struct AlgorithmResult {
     pub name: &'static str,
     pub algorithm_type: AlgorithmType,
     pub final_path: Vec<Coordinate>, // the final path of coordinates
-    pub frames: Vec<FrameNode>,
+    pub frames: Option<Vec<FrameNode>>,
     pub status: AlgorithmResultStatus,
     pub current_index: usize, // current index into final_path
 }
 
 impl AlgorithmResult {
-    pub fn new(name: &'static str, algorithm_type: AlgorithmType, path: Vec<Coordinate>, frames: Vec<FrameNode>) -> Self {
+    pub fn new(name: &'static str, algorithm_type: AlgorithmType, path: Vec<Coordinate>, frames: Option<Vec<FrameNode>>) -> Self {
         Self {
             name,
             algorithm_type,
