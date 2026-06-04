@@ -4,7 +4,7 @@
 
 ## Preview
 
-https://github.com/user-attachments/assets/104fd1fe-00a6-4b9c-afe6-33d06c33d003
+https://github.com/user-attachments/assets/66d81457-87d3-479d-b9aa-2ad8836fde48
 
 ## TODO
 - Implement basic maze generation algorithms:
