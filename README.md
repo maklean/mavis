@@ -16,3 +16,7 @@ https://github.com/user-attachments/assets/104fd1fe-00a6-4b9c-afe6-33d06c33d003
     - [X] BFS
     - [X] DFS
 - [X] Display pathfinding better (i.e., show explored path, and final path more clearly)
+
+## ⚠️ Note
+
+Before you look at the source code (and regret it eternally), understand my goal for my first Rust project was to make it **run** instead of making it **clean**. Beware, you've been warned :)
