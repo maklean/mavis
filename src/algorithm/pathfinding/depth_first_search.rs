@@ -41,7 +41,7 @@ impl DepthFirstSearch {
             parents.insert(neighbor, coord);
 
             let (candidate, dist) = DepthFirstSearch::recurse(neighbor, visited, parents, grid, target, frames);
-            if nearest_dist < dist {
+            if nearest_dist > dist {
                 nearest = candidate;
                 nearest_dist = dist;
             }

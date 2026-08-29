@@ -28,7 +28,6 @@ impl Algorithm for BreadthFirstSearch {
         // set distance of source node to 0
         distances.insert(start, 0);
         queue.push_front(start);
-        
 
         // in case no final path could be made
         let mut nearest = start;

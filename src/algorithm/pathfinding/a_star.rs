@@ -57,9 +57,11 @@ impl Algorithm for AStar {
         let mut open: BinaryHeap<AStarNode> = BinaryHeap::new();
         let mut closed: HashSet<Coordinate> = HashSet::new();
         let mut parent: HashMap<Coordinate, Coordinate> = HashMap::new();
+        let mut g_costs: HashMap<Coordinate, u16> = HashMap::new();
 
         frames.push(FrameNode::new(FrameNodeKind::PENDING, start));
         open.push(AStarNode::new(start, 0, manhattan_distance(start, end)));
+        g_costs.insert(start, 0);
 
         // in case no final path could be made
         let mut nearest = start;
@@ -111,19 +113,17 @@ impl Algorithm for AStar {
                     continue;
                 }
 
-                // get g-cost from BinaryHeap entry or default to u16::MAX
-                let neighbor_g_cost = open
-                    .iter()
-                    .find(|node| node.coord == n_coord)
-                    .map_or(u16::MAX, |node| node.g_cost);
-
+                // get g-cost entry or default to u16::MAX
+                let neighbor_g_cost = *g_costs.get(&n_coord).unwrap_or(&u16::MAX);
                 let tentative_g = current.g_cost + 1;
+
                 if tentative_g < neighbor_g_cost {
                     let new_neighbor_node = AStarNode::new(n_coord, tentative_g, manhattan_distance(n_coord, end));
                     parent.insert(n_coord, current.coord);
 
                     frames.push(FrameNode::new(FrameNodeKind::PENDING, n_coord));
                     open.push(new_neighbor_node);
+                    g_costs.insert(n_coord, tentative_g);
                 }
             }
         }
